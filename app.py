@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 st.set_page_config(
     page_title="Criativa Buffet",
@@ -54,18 +55,58 @@ st.markdown("---")
 
 # Faturamento por mês
 df_filtrado['mes'] = df_filtrado['data_evento'].dt.month
-faturamento_mes = df_filtrado.groupby('mes')['valor_total'].sum()
+faturamento_mes = df_filtrado.groupby('mes', as_index=False)['valor_total'].sum()
+faturamento_mes.columns = ['Mês', 'Faturamento']
 
 st.subheader("📊 Faturamento por Mês")
-st.bar_chart(faturamento_mes, use_container_width=True)
+
+fig_faturamento = px.bar(
+    faturamento_mes,
+    x='Mês',
+    y='Faturamento',
+    text='Faturamento'
+)
+
+fig_faturamento.update_traces(
+    texttemplate='R$ %{text:,.2f}',
+    textposition='outside'
+)
+
+fig_faturamento.update_layout(
+    xaxis_tickangle=0,
+    xaxis=dict(tickmode='linear'),
+    yaxis_title="Faturamento",
+    xaxis_title="Mês"
+)
+
+st.plotly_chart(fig_faturamento, use_container_width=True)
 
 st.markdown("---")
 
 # Temas mais vendidos
-temas = df_filtrado['tema'].value_counts()
+temas = df_filtrado['tema'].value_counts().reset_index()
+temas.columns = ['Tema', 'Quantidade']
 
 st.subheader("🎉 Temas Mais Vendidos")
-st.bar_chart(temas, use_container_width=True)
+
+fig_temas = px.bar(
+    temas,
+    x='Tema',
+    y='Quantidade',
+    text=None
+)
+
+fig_temas.update_traces(
+    textposition='inside'
+)
+
+fig_temas.update_layout(
+    xaxis_tickangle=0,
+    yaxis_title="Quantidade",
+    xaxis_title="Tema"
+)
+
+st.plotly_chart(fig_temas, use_container_width=True)
 
 st.markdown("---")
 
